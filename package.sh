@@ -25,7 +25,7 @@ function setGit(){
 
 }
 
-setGit "/Users/zy/WorkSpace/Test/ShellTest/package" "TEST"
+#setGit "/Users/zy/WorkSpace/Test/ShellTest/package" "TEST"
 
 
 

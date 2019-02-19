@@ -1,7 +1,7 @@
 #! /bin/bash
 
 function replace_content(){
-		#读取内容
+	#读取内容
 	# content=$(cat "${file}")
 	content=""
 	cat "${file}" | while read line ; do
@@ -51,21 +51,12 @@ function replace(){
 	newFile=${2?}
 	oldPrefix=${3?}
 	newPrefix=${4?}
+
 	if ! test -e $newFile
 	then
 
 		# fileName=${newFile##*/}
 		filePath=${newFile%/*}
-
-		fileRegularStr=".*${oldPrefix}.*\.[hm]"
-		# 文件名的替换
-		if [[ "${newFile}" =~ $fileRegularStr ]]; then
-			newFile=${newFile//${oldPrefix}/${newPrefix}}
-			echo "文件名的替换：${newFile}"
-		fi
-
-		echo "filePath:$filePath"
-
 		mkdir -p $filePath
 		touch $newFile		
 	else
@@ -75,7 +66,4 @@ function replace(){
 
 	replace_content
 }
-
-
-
 
