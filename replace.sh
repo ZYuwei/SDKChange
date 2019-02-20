@@ -1,47 +1,69 @@
 #! /bin/bash
 
 function replace_content(){
-	#读取内容
-	# content=$(cat "${file}")
-	content=""
-	cat "${file}" | while read line ; do
-		content="${line}"
-		echo "content ${content}"
-		
-		importRegularStr="^ *#import *[<\"]${oldPrefix}.*\.[hm][\">]"
-		# 文件引用的替换
-		if [[ "${content}" =~ $importRegularStr ]]; then
-			content=${content/${oldPrefix}/${newPrefix}}
-			echo "文件引用的替换：${content}"
+
+	# 过滤文件类型
+	fileRegularStr=".*.[hm]$"
+	if [[ ${file} =~ $fileRegularStr ]]; then
+	    echo "修改OC文件 " $file
+	    #读取内容
+		# content=$(cat "${file}")
+		content=""
+		cat "${file}" | while read line ; do
+			content="${line}"
+			# echo "content ${content}"
+
+			importRegularStr=".*#import *[<\"]${oldPrefix}.*\.[hm]"
+			# 文件引用的替换
+			if [[ "${content}" =~ $importRegularStr ]]; then
+				content=${content/${oldPrefix}/${newPrefix}}
+				# echo "文件引用的替换：${content}"
+				echo "${content}" >> ${newFile}
+				continue
+			fi
+
+			#类声名的替换
+			classRegularStr="^ *@[a-zA-Z]* *${oldPrefix}.*"
+			if [[ "${content}" =~ $classRegularStr ]]; then
+				content=${content/${oldPrefix}/${newPrefix}}
+				# echo "类声名的替换：${content}"
+				echo "${content}" >> ${newFile}
+				continue
+			fi
+
+			#方法名的替换
+			# methodRegularStr="^ *[-+] *\(.*\)${oldPrefix}.*"
+			# if [[ "${content}" =~ $methodRegularStr ]]; then
+			# 	content=${content/${oldPrefix}/${newPrefix}}
+			# 	echo "方法的替换：${content}"
+			# fi
+
+			#内容替换
+			contentRegularStr=".*${oldPrefix}.*"
+			if [[ "${content}" =~ $contentRegularStr ]]; then
+				content=${content//${oldPrefix}/${newPrefix}}
+				# echo "内容替换：${content}"
+			fi
 			echo "${content}" >> ${newFile}
-			continue
-		fi
 
-		#类声名的替换
-		classRegularStr="^ *@[a-zA-Z]* *${oldPrefix}.*"
-		if [[ "${content}" =~ $classRegularStr ]]; then
-			content=${content/${oldPrefix}/${newPrefix}}
-			echo "类声名的替换：${content}"
-			echo "${content}" >> ${newFile}
-			continue
-		fi
+		done
+	else 
+		cp -r $file $newFile
+		continue
+	fi	
+}
 
-		#方法名的替换
-		# methodRegularStr="^ *[-+] *\(.*\)${oldPrefix}.*"
-		# if [[ "${content}" =~ $methodRegularStr ]]; then
-		# 	content=${content/${oldPrefix}/${newPrefix}}
-		# 	echo "方法的替换：${content}"
-		# fi
+function replace_podSpec(){
 
-		#内容替换
-		contentRegularStr=".*${oldPrefix}.*"
-		if [[ "${content}" =~ $contentRegularStr ]]; then
-			content=${content//${oldPrefix}/${newPrefix}}
-			echo "内容替换：${content}"
-		fi
-		echo "${content}" >> ${newFile}
+	filePath=${newFile%/*}
+	mkdir -p $filePath
+	touch $newFile		
 
-	done	
+	cp -r $file $newFile
+
+	sed -i '' "s/$oldPrefix/$newPrefix/g" $newFile
+	sedFilePathStr=${filePath//\//\\\/}
+	sed -i '' "/s.source *=/s/\'.*\'/\'$sedFilePathStr\'/g" $newFile
 }
 
 #1:输入文件路径 #2:输出文件路径 #3旧的前缀 #4新的前缀
@@ -51,19 +73,20 @@ function replace(){
 	newFile=${2?}
 	oldPrefix=${3?}
 	newPrefix=${4?}
+	sdkName=${5?}
 
-	if ! test -e $newFile
-	then
+	filePath=${newFile%/*}
+	mkdir -p $filePath
+	touch $newFile	
 
-		# fileName=${newFile##*/}
-		filePath=${newFile%/*}
-		mkdir -p $filePath
-		touch $newFile		
+	oldFileName=${file##*/}
+	echo "oldFileName" $oldFileName 
+	if [[ $oldFileName == "${sdkName}.podspec" ]]; then
+		echo "podSpec 替换"
+		replace_podSpec 
 	else
-		rm $newFile
-		touch $newFile
-	fi
-
-	replace_content
+        replace_content
+    fi
+	
 }
 
