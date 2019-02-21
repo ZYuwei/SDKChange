@@ -1,55 +1,66 @@
 #! /bin/bash
 
+function prefixLow(){
+	prifixStr=${1?}
+	firstStr="${prifixStr:0:1}"
+	otherStr=${prifixStr:1}
+	firstStr=`echo $firstStr | tr 'A-Z' 'a-z'`
+	echo "$firstStr$otherStr"
+}
+
 function replace_content(){
 
 	# 过滤文件类型
+	cp -r $file $newFile
 	fileRegularStr=".*.[hm]$"
 	if [[ ${file} =~ $fileRegularStr ]]; then
 	    echo "修改OC文件 " $file
 	    #读取内容
-		# content=$(cat "${file}")
-		content=""
-		cat "${file}" | while read line ; do
-			content="${line}"
-			# echo "content ${content}"
+		# content=""
+		# cat "${file}" | while read line ; do
+		# 	content="${line}"
+		# 	# echo "content ${content}"
 
-			importRegularStr=".*#import *[<\"]${oldPrefix}.*\.[hm]"
-			# 文件引用的替换
-			if [[ "${content}" =~ $importRegularStr ]]; then
-				content=${content/${oldPrefix}/${newPrefix}}
-				# echo "文件引用的替换：${content}"
-				echo "${content}" >> ${newFile}
-				continue
-			fi
+		# 	importRegularStr=".*#import *[<\"]${oldPrefix}.*\.[hm]"
+		# 	# 文件引用的替换
+		# 	if [[ "${content}" =~ $importRegularStr ]]; then
+		# 		content=${content/${oldPrefix}/${newPrefix}}
+		# 		# echo "文件引用的替换：${content}"
+		# 		echo "${content}" >> ${newFile}
+		# 		continue
+		# 	fi
 
-			#类声名的替换
-			classRegularStr="^ *@[a-zA-Z]* *${oldPrefix}.*"
-			if [[ "${content}" =~ $classRegularStr ]]; then
-				content=${content/${oldPrefix}/${newPrefix}}
-				# echo "类声名的替换：${content}"
-				echo "${content}" >> ${newFile}
-				continue
-			fi
+		# 	#类声名的替换
+		# 	classRegularStr="^ *@[a-zA-Z]* *${oldPrefix}.*"
+		# 	if [[ "${content}" =~ $classRegularStr ]]; then
+		# 		content=${content/${oldPrefix}/${newPrefix}}
+		# 		# echo "类声名的替换：${content}"
+		# 		echo "${content}" >> ${newFile}
+		# 		continue
+		# 	fi	
+		# 	echo "${content}" >> ${newFile}		
+		# done
 
-			#方法名的替换
-			# methodRegularStr="^ *[-+] *\(.*\)${oldPrefix}.*"
-			# if [[ "${content}" =~ $methodRegularStr ]]; then
-			# 	content=${content/${oldPrefix}/${newPrefix}}
-			# 	echo "方法的替换：${content}"
-			# fi
+		#方法名的替换
+		# oldMethodPrefix=`prefixLow $oldPrefix`
+		# newMethodPrefix=`prefixLow $newPrefix`
+		# methodRegularStr="^ *${oldMethodPrefix}.*"
+		# if [[ "${content}" =~ $methodRegularStr ]]; then
+		# 	content=${content//${oldMethodPrefix}/${newMethodPrefix}}
+		# 	echo "方法名的替换：${content}"
+		# fi
 
-			#内容替换
-			contentRegularStr=".*${oldPrefix}.*"
-			if [[ "${content}" =~ $contentRegularStr ]]; then
-				content=${content//${oldPrefix}/${newPrefix}}
-				# echo "内容替换：${content}"
-			fi
-			echo "${content}" >> ${newFile}
-
-		done
-	else 
-		cp -r $file $newFile
-		continue
+		#其他内容替换
+		# contentRegularStr=".*${oldPrefix}.*"
+		# if [[ "${content}" =~ $contentRegularStr ]]; then
+		# 	content=${content//${oldPrefix}/${newPrefix}}
+		# 	# echo "内容替换：${content}"
+		# fi
+		
+		#内容替换
+		oldMethodPrefix=`prefixLow $oldPrefix`
+		newMethodPrefix=`prefixLow $newPrefix`
+		sed -i '' -e "s/$oldMethodPrefix/$newMethodPrefix/g" -e "s/$oldPrefix/$newPrefix/g" $newFile
 	fi	
 }
 

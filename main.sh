@@ -1,12 +1,13 @@
 #! /bin/bash
-. ~/WorkSpace/Test/ShellTest/shell/replace.sh
-. ~/WorkSpace/Test/ShellTest/shell/package.sh
+. ./replace.sh
+. ./package.sh
 
 #文件配置
 filepath="/Users/zy/WorkSpace/Test/ShellTest/Co_pay_PayNotificationSDK"
 newFilePath="/Users/zy/WorkSpace/Test/ShellTest/package/TESTPayNotificationSDK"
 oldPrefix="Co_pay_"
 newPrefix="TEST"
+
 sdkName=${filepath##*/}
 echo "目标文件夹 ${filepath}"
 
@@ -41,10 +42,10 @@ function main(){
     changePath=${filepath}
     getdir $changePath 
     # 创建git
-    cd $newFilePath
-    git init && git add . && git commit -m "build" 
-    podspec=${sdkName/$oldPrefix/$newPrefix}
-    pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs' --no-mangle --gomoad --exclude-deps
+    # cd $newFilePath
+    # git init && git add . && git commit -m "build" 
+    # podspec=${sdkName/$oldPrefix/$newPrefix}
+    # pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs' --no-mangle --gomoad --exclude-deps
 }
 
 main 
