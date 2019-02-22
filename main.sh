@@ -1,10 +1,10 @@
 #! /bin/bash
 . ./replace.sh
 . ./package.sh
-
 #文件配置
 filepath="/Users/zy/WorkSpace/Test/ShellTest/Co_pay_PayNotificationSDK"
 newFilePath="/Users/zy/WorkSpace/Test/ShellTest/package/TESTPayNotificationSDK"
+gitPath="/Users/zy/WorkSpace/Test/ShellTest/framework"
 oldPrefix="Co_pay_"
 newPrefix="TEST"
 
@@ -42,14 +42,25 @@ function main(){
     changePath=${filepath}
     getdir $changePath 
     # 创建git
-    # cd $newFilePath
-    # git init && git add . && git commit -m "build" 
-    # podspec=${sdkName/$oldPrefix/$newPrefix}
-    # pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs' --no-mangle --gomoad --exclude-deps
+    cd $newFilePath
+    git init && git add . && git commit -m "build" 
+    podspec=${sdkName/$oldPrefix/$newPrefix}
+    pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs' --no-mangle --gomoad --exclude-deps
+    versionStr=`sed -n "/s.version *=/p" ${podspec}.podspec`
+    versionStr=`echo $versionStr | tr -cd "[0-9.]"`
+    versionStr=${versionStr:1}
+    frameworkPath="${newFilePath}/${podspec}-${versionStr}"
+    echo $frameworkPath 
+    #清空仓库
+    for file in ${gitPath}/*
+    do
+        if [[ $file =~ "${podspec}" ]];then
+            rm -rf $file
+            echo "删除" $podspec"/"$file
+        fi
+    done
+    # 拷贝到git 仓库
+    cp -r ${frameworkPath}/ios/ ${gitPath}/
+    cd ${gitPath} && git pull origin && git add . && git commit -m $versionStr && git push origin
 }
-
 main 
-
-
-# replace_content "/Users/zy/WorkSpace/Test/ShellTest/CSPayNotificationSDK/Classes/Core/GMPayNotificationFailManager.h" "/Users/zy/WorkSpace/Test/ShellTest/NewCSPayNotificationSDK/Classes/Core/GMPayNotificationFailManager.h" "GM" "TEST"
-
