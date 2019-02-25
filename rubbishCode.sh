@@ -7,25 +7,25 @@ enArray=('a1' 'b1' 'c1' 'd1' 'e1' 'f1' 'g1' 'h1' 'i1' 'j1' 'k1' 'l1' 'm1' 'n1' '
 
 
 function judgeEnString(){
-	rubbishEnArr=${1}
+	rubbishEnArr=${*}
 	rubbishNewObjNameRand=`echo $RANDOM%26 | bc`
 	rubbishNewObjName=${enArray[rubbishNewObjNameRand]}
-	rubbishEnArrStr="${rubbishEnArr[*]}"
+	rubbishEnArrStr=${rubbishEnArr[*]}
 	if [[ $rubbishEnArrStr =~ $rubbishNewObjName ]]; then
-		judgeEnString $rubbishEnArr
+		judgeEnString ${rubbishEnArr[*]}
 	else
 		echo $rubbishNewObjName
 	fi
 }
 
 function judgeParmString(){
-	rubbishParmArr=${1}
+	rubbishParmArr=${*}
 	rubbishParmNameRand=`echo $RANDOM%11 | bc`
 	rubbishPramClass=${classArray[rubbishParmNameRand]}
 	rubbishParmName=${methodParamArray[rubbishParmNameRand]}
 	rubbishParamArrStr="${rubbishParmArr[*]}"
 	if [[ $rubbishParamArrStr =~ $rubbishParmName ]]; then
-		judgeParmString $rubbishParmArr
+		judgeParmString ${rubbishParmArr[*]}
 	else
 		echo "(${rubbishPramClass} *)${rubbishParmName}"
 	fi
@@ -38,7 +38,7 @@ function generateFuncContent(){
 	rubbishNewObjRandNum=`echo $RANDOM%5+1 | bc`
 	for (( rubbishJ = 0; rubbishJ < $rubbishNewObjRandNum; rubbishJ++ )); do
 		# 判断name是否重复并获取一个不重复的
-		rubbishewObjName=`judgeEnString $rubbishObjArr`
+		rubbishewObjName=`judgeEnString ${rubbishObjArr[*]}`
 		# objArrIndex=$(echo ${#rubbishObjArr[*]} | bc)
 		rubbishObjArr[${#rubbishObjArr[*]}]=$rubbishewObjName
 		rubbishNewClassRand=`echo $RANDOM%11 | bc`
@@ -50,11 +50,11 @@ function generateFuncContent(){
 	for (( rubbishI = 0; rubbishI < $rubbishForinRandNum; rubbishI++ )); do
 		rubbishForinRandCount=`echo $RANDOM%50+1 | bc`
 		rubbishForinStr="for (int i=0; i<${rubbishForinRandCount}; i++) {"
-		rubbishForinArr=('')
+		rubbishForinArr=${rubbishObjArr[*]}
 		rubbishForinObjRandNum=`echo $RANDOM%5+1 | bc`
 		for (( rubbishM = 0; rubbishM < $rubbishForinObjRandNum; rubbishM++ )); do
 			# 判断name是否重复并获取一个不重复的
-			rubbishForinObjName=`judgeEnString $rubbishForinArr`
+			rubbishForinObjName=`judgeEnString ${rubbishForinArr[*]}`
 			# forinArrIndex=$(echo ${#rubbishForinArr[*]} | bc)
 			rubbishForinArr[${#rubbishForinArr[*]}]=$rubbishForinObjName
 			rubbishForinClassRand=`echo $RANDOM%11 | bc`
@@ -62,7 +62,9 @@ function generateFuncContent(){
 			rubbishForinStr="${rubbishForinStr}\\ ${rubbishForinObjClass} *${rubbishForinObjName} = [${rubbishForinObjClass} new];"
 		done
 		rubbishContentStr="${rubbishContentStr}\\${rubbishForinStr}\\}"
+		unset rubbishForinArr
 	done
+
 }
 
 function generateFunc(){
@@ -82,7 +84,7 @@ function generateFunc(){
 		for (( rubbishZ = 0; rubbishZ<$rubbishFandPramNum; rubbishZ++ ))
 		do
 			# 随机取一个类
-			rubbishRandPramName=`judgeParmString $rubbishParamArray`
+			rubbishRandPramName=`judgeParmString ${rubbishParamArray[*]}`
 			# rubbishParamArrayLastIndex=$(echo ${#rubbishParamArray[*]} | bc)
 			rubbishParamArray[${#rubbishParamArray[*]}]=$rubbishRandPramName
 			if [[ $i == 0 ]]; then
@@ -129,7 +131,6 @@ function insetFile(){
 			# 插入
 			sed -i '' -e "/)${rubbishInsetLineStr}/i\\
 			${rubbishInsetCode}" $rubbishFile
-			echo insert rubbishInsetLineStr $rubbishInsetLineStr rubbishInsetCode $rubbishInsetCode 
 		else
 			echo noinsert because no rubbishInsetLineStr rubbishFile $rubbishFile
 		fi
