@@ -1,8 +1,8 @@
 #! /bin/bash
 
-classArray=('NSString' 'UILabel' 'NSDictionary' 'NSData' 'UIScrollView' 'UIView' 'NSObject' 'UIImage' 'NSArray' 'UIImageView' 'NSMutableString') #11
+classArray=('NSString' 'NSDate' 'NSDictionary' 'NSData' 'NSError' 'NSNumber' 'NSObject' 'NSTimer' 'NSArray' 'NSMutableArray' 'NSMutableString') #11
 methodNameArray=('action' 'setup' 'reset' 'pay' 'notificaiton' 'load' 'reload' 'status' 'progress' 'resume' 'cancel' 'add' 'remove') #13
-methodParamArray=('str' 'lab' 'dic' 'data' 'scrol' 'view' 'obj' 'img' 'arr' 'imgV' 'mutableStr') #11
+methodParamArray=('str' 'date' 'dic' 'data' 'err' 'num' 'obj' 'timer' 'arr' 'muArr' 'mutableStr') #11
 enArray=('a1' 'b1' 'c1' 'd1' 'e1' 'f1' 'g1' 'h1' 'i1' 'j1' 'k1' 'l1' 'm1' 'n1' 'o1' 'p1' 'q1' 'r1' 's1' 't1' 'u1' 'v1' 'w1' 's1' 'y1' 'z1') #26
 
 
@@ -115,22 +115,24 @@ function insetFile(){
 		# echo rubbishLineStr $rubbishLineStr rubbishAllLineString $rubbishAllLineString
 	done
 
-	if [[ ${#rubbishLineArr[*]} > 0 ]]; then
+	if [[ ${#rubbishLineArr[*]} > 1 ]]; then
 		rubbishInsetLineNum=`echo $RANDOM%${#rubbishLineArr[*]} | bc`
 		rubbishInsetLineStr=${rubbishLineArr[$rubbishInsetLineNum]}
+		echo rubbishInsetLineStr $rubbishInsetLineStr
 		rubbishInsetLineStr="${rubbishInsetLineStr#*)}"
 		rubbishInsetLineStr="${rubbishInsetLineStr%%:*}"
 		rubbishInsetLineStr="${rubbishInsetLineStr%%{*}"
 
-		if [[ ${#rubbishInsetLineStr} != 0 ]]; then
+		if [[ ${#rubbishInsetLineStr} > 1 ]]; then
 			# 获取垃圾代码
 			generateFunc
-			#插入
+			# 插入
 			sed -i '' -e "/)${rubbishInsetLineStr}/i\\
 			${rubbishInsetCode}" $rubbishFile
-			echo insert rubbishInsetLineStr $rubbishInsetLineStr rubbishInsetCode $rubbishInsetCode
+			echo insert rubbishInsetLineStr $rubbishInsetLineStr rubbishInsetCode $rubbishInsetCode 
+		else
+			echo noinsert because no rubbishInsetLineStr rubbishFile $rubbishFile
 		fi
-		echo noinsert because no rubbishInsetLineStr rubbishFile $rubbishFile
 	else
 		echo noinsert because no rubbishLineArr rubbishFile $rubbishFile
 	fi
