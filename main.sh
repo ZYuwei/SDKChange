@@ -8,8 +8,6 @@ in_file_base_path="/Users/zy/WorkSpace/Test/ShellTest/Source"
 sdk_file_base_path="/Users/zy/WorkSpace/Test/ShellTest/sdk"
 out_file_base_path="/Users/zy/WorkSpace/Test/ShellTest/package"
 
-echo "目标文件夹 ${source_path}"
-
 function getdir(){
     echo "检索文件夹" ${1?}
     for file in $1/*
@@ -40,7 +38,32 @@ function getdir(){
     done
 }
 
-function main(){
+function package_sdk(){
+        # 创建git
+        cd $out_file_path
+        git init && git add . && git commit -m "build" 
+        podspec=${old_name/$old_prefix/$new_prefix}
+        pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs' --no-mangle --gomoad --exclude-deps
+        versionStr=`sed -n "/s.version *=/p" ${podspec}.podspec`
+        versionStr=`echo $versionStr | tr -cd "[0-9.]"`
+        versionStr=${versionStr:1}
+        frameworkPath="${out_file_path}/${podspec}-${versionStr}"
+        echo $frameworkPath 
+        #清空仓库
+
+        for file in ${sdk_path}/*
+        do
+            if [[ $file =~ "${podspec}" ]];then
+                rm -rf $file
+                echo "删除" $podspec"/"$file
+            fi
+        done
+        # 拷贝到git 仓库
+        cp -r ${frameworkPath}/ios/ ${sdk_path}/
+}
+
+
+function workStart(){
     mkdir -p $in_file_base_path
     mkdir -p $sdk_file_base_path
 
@@ -74,6 +97,8 @@ function main(){
     fi
 
     #source_path 源代码本地git路径 #sdk_path 输出sdk指定git路径 #old_prefix 旧前缀  #new_prefix_arr 新前缀数组
+
+    #遍历所有新前缀
     for prefix in ${new_prefix_arr[*]}; do
         new_prefix=$prefix
         new_name=${old_name/${old_prefix}/${new_prefix}}
@@ -82,29 +107,11 @@ function main(){
         echo "删除 路径下文件" $out_file_path
         getdir $source_path
         
-        # 创建git
-        cd $out_file_path
-        git init && git add . && git commit -m "build" 
-        podspec=${old_name/$old_prefix/$new_prefix}
-        pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs' --no-mangle --gomoad --exclude-deps
-        versionStr=`sed -n "/s.version *=/p" ${podspec}.podspec`
-        versionStr=`echo $versionStr | tr -cd "[0-9.]"`
-        versionStr=${versionStr:1}
-        frameworkPath="${out_file_path}/${podspec}-${versionStr}"
-        echo $frameworkPath 
-        # #清空仓库
-
-        for file in ${sdk_path}/*
-        do
-            if [[ $file =~ "${podspec}" ]];then
-                rm -rf $file
-                echo "删除" $podspec"/"$file
-            fi
-        done
+        # 打包SDK并复制到sdk文件夹
+        package_sdk
     done
-    # 拷贝到git 仓库
-    cp -r ${frameworkPath}/ios/ ${sdk_path}/
+    # 上传
     cd ${sdk_path} && git pull origin && git add . && git commit -m $versionStr && git tag ${versionStr} && git push origin --tags
 }
 
-main 
+workStart 

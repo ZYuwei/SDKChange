@@ -1,29 +1,44 @@
 #! /bin/bash	
 
 
+function changeConfig(){
+	config_str=${1?}
+	config_str=${config_str%\#*}
+	config_str=${config_str#*\'}
+	config_str=${config_str%\'*}
+
+	if [[ ${#config_str} <1 ]]; then
+		echo error: the lack of config, please review config
+		kill $$	
+	fi
+	echo $config_str
+}
+
 function readConfig(){
 	configFile=${1?}
 
 	old_name=`grep -h 's.old_name.*' $configFile`
-	old_name=${old_name%\#*}
-	old_name=${old_name#*\'}
-	old_name=${old_name%\'*}
-
-	if [[ ${#old_name} <1 ]]; then
-		echo error: no old_name, please review config
-		kill $$	
-	fi
+	old_name=`changeConfig $old_name`
 
 
 	old_prefix=`grep -h 's.old_prefix.*' $configFile`
-	old_prefix=${old_prefix%\#*}
-	old_prefix=${old_prefix#*\'}
-	old_prefix=${old_prefix%\'*}
+	old_prefix=`changeConfig $old_prefix`
 
-	if [[ ${#old_prefix} <1 ]]; then
-		echo error: no old_prefix, please review config
-		kill $$	
-	fi
+	in_git_path=`grep -h 's.in_path.*' $configFile`
+	in_git_path=`changeConfig $in_git_path`
+
+
+	out_git_path=`grep -h 's.out_path.*' $configFile`
+	out_git_path=`changeConfig $out_git_path`
+
+	in_file_base_path=`grep -h 's.in_file_base_path.*' $configFile`
+	in_file_base_path=`changeConfig $in_file_base_path`
+
+	sdk_file_base_path=`grep -h 's.sdk_file_base_path.*' $configFile`
+	sdk_file_base_path=`changeConfig $sdk_file_base_path`
+
+	out_file_base_path=`grep -h 's.out_file_base_path.*' $configFile`
+	out_file_base_path=`changeConfig $out_file_base_path`
 
 	new_prefixs=`grep -h 's.new_prefix.*' $configFile`
 	new_prefixs=${new_prefixs#*=}
@@ -46,32 +61,15 @@ function readConfig(){
 		kill $$	
 	fi
 
-
-	in_git_path=`grep -h 's.in_path.*' $configFile`
-	in_git_path=${in_git_path%\#*}
-	in_git_path=${in_git_path#*\'}
-	in_git_path=${in_git_path%\'*}
-
-	if [[ ${#in_git_path} <1 ]]; then
-		echo error: no in_path, please review config
-		kill $$	
-	fi
-
-	out_git_path=`grep -h 's.out_path.*' $configFile`
-	out_git_path=${out_git_path%\#*}
-	out_git_path=${out_git_path#*\'}
-	out_git_path=${out_git_path%\'*}
-
-	if [[ ${#out_git_path} <1 ]]; then
-		echo error: no out_path, please review config
-		kill $$	
-	fi
-
 	echo old_name: $old_name
 	echo old_prefix: $old_prefix
 	echo new_prefix_arr: ${new_prefix_arr[*]}
 	echo in_git_path: $in_git_path
 	echo out_git_path: $out_git_path
+	echo in_file_base_path: $in_file_base_path
+	echo sdk_file_base_path: $sdk_file_base_path
+	echo out_file_base_path: $out_file_base_path
+
 }
 
 # function readConfigPath(){
