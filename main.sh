@@ -67,7 +67,7 @@ function workStart(){
     mkdir -p $in_file_base_path
     mkdir -p $sdk_file_base_path
 
-    readConfig '/Users/zy/WorkSpace/Test/ShellTest/config/Co_pay_PayNotificationSDK.config'
+    readConfig '/Users/zy/WorkSpace/Test/ShellTest/shell/config/Co_pay_PayNotificationSDK.config'
 
     oldPrefix=$old_prefix
     #源代码git文件名
