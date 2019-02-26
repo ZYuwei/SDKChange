@@ -31,6 +31,9 @@ function readConfig(){
 	out_git_path=`grep -h 's.out_path.*' $configFile`
 	out_git_path=`changeConfig $out_git_path`
 
+	pod_spec_base_path=`grep -h 's.pod_spec_base_path.*' $configFile`
+	pod_spec_base_path=`changeConfig $pod_spec_base_path`
+
 	in_file_base_path=`grep -h 's.in_file_base_path.*' $configFile`
 	in_file_base_path=`changeConfig $in_file_base_path`
 

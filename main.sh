@@ -45,17 +45,42 @@ function package_sdk(){
         frameworkPath="${out_file_path}/${podspec}-${versionStr}"
         echo $frameworkPath 
         #清空仓库
-
-        for file in ${sdk_path}/*
+        mkdir -p ${sdk_path}/${versionStr}
+        for file in ${sdk_path}/${versionStr}/*
         do
             if [[ $file =~ "${podspec}" ]];then
                 rm -rf $file
-                echo "删除" $podspec"/"$file
+                echo "删除历史文件" $podspec $file
             fi
         done
         # 拷贝到git 仓库
-        cp -r ${frameworkPath}/ios/ ${sdk_path}/
+        cp -r ${frameworkPath}/ios/ ${sdk_path}/${versionStr}/
+        #修改spec
+        sdk_spec_file=${frameworkPath}/${podspec}.podspec
+        framework_git_path="${out_git_path}/${versionStr}/${podspec}.framework"
+        framework_git_path=${framework_git_path//\//\\\/}
+        sed -i '' "s/s.source = —force/s.source ={ :http => '${framework_git_path}'}/g" $sdk_spec_file
+        
+        pod_spec_path="${pod_spec_base_path}/${podspec}/${versionStr}"
+        mkdir -p $pod_spec_path
+        # 移除历史文件
+        for file in ${pod_spec_path}/*
+        do
+            if [[ $file =~ "${podspec}" ]];then
+                rm -rf $file
+                echo "删除历史文件" $podspec"/"$file
+            fi
+        done
+        # 更新pod仓库
+        cd ${pod_spec_base_path} && git pull
+        # 拷贝
+        cp -r ${sdk_spec_file} ${pod_spec_path}/
+        # 上传git
+        cd ${pod_spec_base_path} && git add . && git commit -m "update ${podspec} for ${versionStr}"
+        git push origin
 }
+
+
 
 
 function workStart(){
@@ -106,7 +131,8 @@ function workStart(){
         package_sdk
     done
     # 上传
-    cd ${sdk_path} && git pull origin && git add . && git commit -m $versionStr && git tag ${versionStr} && git push origin --tags
+    cd ${sdk_path} && git pull origin && git add . && git commit -m $versionStr
+    git push origin
 }
 
 workStart 
