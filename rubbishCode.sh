@@ -73,7 +73,7 @@ function generateFunc(){
 	rubbishRandMethodName=${methodNameArray[rubbishRandMethodNum]}
 	# 判断方法名是否存在
 	if [ `grep -c ")$rubbishRandMethodName" $rubbishFile` -ne '0' ]; then
-		echo found same method $rubbishRandMethodName ,will reset 
+		echo -e "\033[33m found same method ${rubbishRandMethodName} ,will reset \033[0m" 
 		generateFunc
 	else
 		rubbishFuncStr="- (void)$rubbishRandMethodName"
@@ -132,10 +132,10 @@ function insetFile(){
 			sed -i '' -e "/)${rubbishInsetLineStr}/i\\
 			${rubbishInsetCode}" $rubbishFile
 		else
-			echo noinsert because no rubbishInsetLineStr rubbishFile $rubbishFile
+			echo -e "\033[33m warning: noinsert because no rubbishInsetLineStr rubbishFile ${rubbishFile} \033[0m" 
 		fi
 	else
-		echo noinsert because no rubbishLineArr rubbishFile $rubbishFile
+		echo -e "\033[33m warning: noinsert because no rubbishLineArr rubbishFile ${rubbishFile} \033[0m"
 	fi
 	unset rubbishInsetCode
 	unset rubbishLineArr

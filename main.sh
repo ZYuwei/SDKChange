@@ -3,11 +3,6 @@
 . ./rubbishCode.sh
 . ./readConfig.sh
 
-#文件配置
-in_file_base_path="/Users/zy/WorkSpace/Test/ShellTest/Source"
-sdk_file_base_path="/Users/zy/WorkSpace/Test/ShellTest/sdk"
-out_file_base_path="/Users/zy/WorkSpace/Test/ShellTest/package"
-
 function getdir(){
     echo "检索文件夹" ${1?}
     for file in $1/*
@@ -64,11 +59,11 @@ function package_sdk(){
 
 
 function workStart(){
-    mkdir -p $in_file_base_path
-    mkdir -p $sdk_file_base_path
 
     readConfig '/Users/zy/WorkSpace/Test/ShellTest/shell/config/Co_pay_PayNotificationSDK.config'
-
+    mkdir -p $in_file_base_path
+    mkdir -p $sdk_file_base_path
+    
     oldPrefix=$old_prefix
     #源代码git文件名
     in_path_name=${in_git_path##*/}

@@ -8,7 +8,7 @@ function changeConfig(){
 	config_str=${config_str%\'*}
 
 	if [[ ${#config_str} <1 ]]; then
-		echo error: the lack of config, please review config
+		echo -e "\033[33m error: the lack of config, please review config \033[0m" 
 		kill $$	
 	fi
 	echo $config_str
