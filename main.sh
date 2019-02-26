@@ -19,11 +19,6 @@ function getdir(){
         #替换文件名
         newfile="${out_file_path}${file##${source_path}}"
         newfile=${newfile//${old_prefix}/${new_prefix}}
-        echo file: $file
-        echo newfile: $newfile
-        echo old_prefix: $old_prefix
-        echo new_prefix: $new_prefix
-        echo old_name: $old_name
         #替换开始
         replace $file $newfile $old_prefix $new_prefix $old_name
         #替换结束
@@ -43,7 +38,7 @@ function package_sdk(){
         versionStr=`echo $versionStr | tr -cd "[0-9.]"`
         versionStr=${versionStr:1}
         frameworkPath="${out_file_path}/${podspec}-${versionStr}"
-        echo $frameworkPath 
+        echo frameworkPath $frameworkPath 
         #清空仓库
         mkdir -p ${sdk_path}/${versionStr}
         for file in ${sdk_path}/${versionStr}/*
@@ -53,31 +48,46 @@ function package_sdk(){
                 echo "删除历史文件" $podspec $file
             fi
         done
+        # 压缩sdk
+        zip -r ${frameworkPath}/${podspec}.zip ${frameworkPath}/ios
         # 拷贝到git 仓库
-        cp -r ${frameworkPath}/ios/ ${sdk_path}/${versionStr}/
+        cp -r ${frameworkPath}/${podspec}.zip ${sdk_path}/${versionStr}/
         #修改spec
         sdk_spec_file=${frameworkPath}/${podspec}.podspec
-        framework_git_path="${out_git_path}/${versionStr}/${podspec}.framework"
-        framework_git_path=${framework_git_path//\//\\\/}
-        sed -i '' "s/s.source = —force/s.source ={ :http => '${framework_git_path}'}/g" $sdk_spec_file
+        framework_download_path=${out_git_path%.*}
+        framework_download_path=${framework_download_path//github/raw.githubusercontent}/master/${versionStr}/${podspec}.zip
+        framework_download_path=${framework_download_path//\//\\\/}
+        sed -i '' "s/s.source = —force/s.source ={ :http => '${framework_download_path}'}/g" $sdk_spec_file
         
         pod_spec_path="${pod_spec_base_path}/${podspec}/${versionStr}"
-        mkdir -p $pod_spec_path
+
+        if test -d ${pod_spec_base_path} ; then
+            # 更新pod仓库
+            cd ${pod_spec_base_path} && git pull
+        else
+            # 安装pod 仓库
+            spec_clone_path=${pod_spec_base_path%/*}
+            echo -e "\033[33m install podSpec directory on ${pod_spec_base_path} \033[0m"
+            cd ${spec_clone_path} && git clone ${pod_git_path}
+        fi
+        
+        # 确保目录存在
+        mkdir -p ${pod_spec_path}
         # 移除历史文件
         for file in ${pod_spec_path}/*
         do
-            if [[ $file =~ "${podspec}" ]];then
+            if [[ $file =~ "${podspec}.spec" ]];then
                 rm -rf $file
-                echo "删除历史文件" $podspec"/"$file
+                echo "删除历史文件" $podspec $file
             fi
         done
-        # 更新pod仓库
-        cd ${pod_spec_base_path} && git pull
+
         # 拷贝
         cp -r ${sdk_spec_file} ${pod_spec_path}/
         # 上传git
         cd ${pod_spec_base_path} && git add . && git commit -m "update ${podspec} for ${versionStr}"
         git push origin
+        
 }
 
 

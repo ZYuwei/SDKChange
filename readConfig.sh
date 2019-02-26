@@ -43,6 +43,9 @@ function readConfig(){
 	out_file_base_path=`grep -h 's.out_file_base_path.*' $configFile`
 	out_file_base_path=`changeConfig $out_file_base_path`
 
+	pod_git_path=`grep -h 's.pod_git_path.*' $configFile`
+	pod_git_path=`changeConfig $pod_git_path`
+	
 	new_prefixs=`grep -h 's.new_prefix.*' $configFile`
 	new_prefixs=${new_prefixs#*=}
 	new_prefixs=${new_prefixs%\#*}
