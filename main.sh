@@ -203,7 +203,7 @@ function startToDemo(){
         rm -rf $out_file_path
         echo "删除 路径下文件" $out_file_path
         getdir ${source_path} 2
-        
+        cd ${out_file_path}/Example && pod install
         # 打包SDK并复制到sdk文件夹
         package_sdk
     done
