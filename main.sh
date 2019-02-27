@@ -160,6 +160,10 @@ function setupGit(){
         git clone $in_git_path
     fi
 
+    if [ $? -ne 0 ]; then
+        echo -e "\033[31m error: git setup failed ${in_git_path} \033[0m"
+        kill $$
+    fi
     # 输出git文件名 
     out_path_name=${out_git_path##*/}
     out_path_name=${out_path_name%.*}
@@ -171,6 +175,11 @@ function setupGit(){
     else
         cd ${sdk_file_base_path}
         git clone $out_git_path
+    fi
+
+    if [ $? -ne 0 ]; then
+        echo -e "\033[31m error: git setup failed ${out_git_path} \033[0m"
+        kill $$
     fi
 }
 
