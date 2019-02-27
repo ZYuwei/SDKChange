@@ -218,9 +218,10 @@ function startToDemo(){
     done
 }
 
-# 参数1类型：1打包config下所有config; 2打包config下某一个config; 3使用config下某一个config打包Demo
+# 参数1类型：1-通过config下所有前缀进行打包framework; 2-通过config以及在参数3输入的前缀进行打包framework; 3-通过config以及在参数3输入的前缀进行打包Demo
 # 参数2配置文件的地址
 # 参数3单独设置前缀或打Demo时使用新前缀
+# 如:workStart '3' '/Users/zy/WorkSpace/Test/ShellTest/shell/config/Co_pay_PayNotificationSDK.config' 'New_Test_'
 function workStart(){
 
     work_type=${1?}
@@ -265,5 +266,5 @@ function workStart(){
     git push origin
 }
 
-workStart ${1?} ${2?} ${3?}
-# workStart '3' '/Users/zy/WorkSpace/Test/ShellTest/shell/config/Co_pay_PayNotificationSDK.config' 'New_Test_'
+workStart ${1?} ${2?} ${3}
+
