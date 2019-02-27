@@ -13,54 +13,17 @@ function replace_content(){
 	# 过滤文件类型
 	cp -r $file $newFile
 	fileRegularStr=".*.[hm]$"
+	podRegularStr=".*Podfile"
 	if [[ ${file} =~ $fileRegularStr ]]; then
 	    echo "修改OC文件 " $file
-	    #读取内容
-		# content=""
-		# cat "${file}" | while read line ; do
-		# 	content="${line}"
-		# 	# echo "content ${content}"
-
-		# 	importRegularStr=".*#import *[<\"]${oldPrefix}.*\.[hm]"
-		# 	# 文件引用的替换
-		# 	if [[ "${content}" =~ $importRegularStr ]]; then
-		# 		content=${content/${oldPrefix}/${newPrefix}}
-		# 		# echo "文件引用的替换：${content}"
-		# 		echo "${content}" >> ${newFile}
-		# 		continue
-		# 	fi
-
-		# 	#类声名的替换
-		# 	classRegularStr="^ *@[a-zA-Z]* *${oldPrefix}.*"
-		# 	if [[ "${content}" =~ $classRegularStr ]]; then
-		# 		content=${content/${oldPrefix}/${newPrefix}}
-		# 		# echo "类声名的替换：${content}"
-		# 		echo "${content}" >> ${newFile}
-		# 		continue
-		# 	fi	
-		# 	echo "${content}" >> ${newFile}		
-		# done
-
-		#方法名的替换
-		# oldMethodPrefix=`prefixLow $oldPrefix`
-		# newMethodPrefix=`prefixLow $newPrefix`
-		# methodRegularStr="^ *${oldMethodPrefix}.*"
-		# if [[ "${content}" =~ $methodRegularStr ]]; then
-		# 	content=${content//${oldMethodPrefix}/${newMethodPrefix}}
-		# 	echo "方法名的替换：${content}"
-		# fi
-
-		#其他内容替换
-		# contentRegularStr=".*${oldPrefix}.*"
-		# if [[ "${content}" =~ $contentRegularStr ]]; then
-		# 	content=${content//${oldPrefix}/${newPrefix}}
-		# 	# echo "内容替换：${content}"
-		# fi
-		
 		#内容替换
 		oldMethodPrefix=`prefixLow $oldPrefix`
 		newMethodPrefix=`prefixLow $newPrefix`
 		sed -i '' -e "s/$oldMethodPrefix/$newMethodPrefix/g" -e "s/$oldPrefix/$newPrefix/g" $newFile
+	elif [[ ${file} =~ $podRegularStr ]]; then
+		echo "修改podfile文件 " $file
+
+		sed -i '' "/pod.*${oldPrefix}/s/$oldPrefix/$newPrefix/g" $newFile
 	fi	
 }
 

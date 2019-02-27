@@ -3,18 +3,38 @@
 . ./rubbishCode.sh
 . ./readConfig.sh
 
+# search_type: 1framework 2demo
 function getdir(){
     echo "检索文件夹" ${1?}
+    search_type=${2?}
     for file in $1/*
     do
     if test -d $file ; then
         #文件夹递归
         lasePath=${file##*/}
-        if [[ $lasePath == "Pods" || $lasePath == "Example" || $lasePath == "_Pods.xcodeproj" ]]; then
-            echo "忽略 路径" $lasePath
-        else
-            getdir $file
-        fi
+
+        case ${search_type} in
+            '1')
+                if [[ $lasePath == "Pods" || $lasePath == "Example" || $lasePath == "_Pods.xcodeproj" ]]; then
+                    echo "忽略 路径" $lasePath
+                else
+                    getdir ${file} ${search_type}
+                fi        
+            ;;
+            '2')
+                if [[ $lasePath == "Pods" || $lasePath == "_Pods.xcodeproj" ]]; then
+                    echo "忽略 路径" $lasePath
+                else
+                    # demo文件夹特殊处理
+                    if [[ $lasePath == "Example" ]]; then
+                        getdirForDemo ${file}
+                    else
+                        getdir ${file} ${search_type}
+                    fi
+                fi        
+            ;;
+        esac
+
     elif test -f $file ; then
         #替换文件名
         newfile="${out_file_path}${file##${source_path}}"
@@ -22,8 +42,32 @@ function getdir(){
         #替换开始
         replace $file $newfile $old_prefix $new_prefix $old_name
         #替换结束
-        #增加垃圾代码
-        rubbishCode $newfile 
+        rubbishCode $newfile
+    fi
+    done
+}
+
+function getdirForDemo(){
+    echo "检索文件夹" ${1?}
+    for file in $1/*
+    do
+    if test -d $file ; then
+        #文件夹递归
+        lasePath=${file##*/}
+        if [[ $lasePath == "Pods" ]]; then
+            echo "忽略 路径" $lasePath
+        else
+            # demo文件夹特殊处理
+            getdirForDemo ${file}
+        fi  
+
+    elif test -f $file ; then
+        #替换文件名
+        newfile="${out_file_path}${file##${source_path}}"
+        # newfile=${newfile//${old_prefix}/${new_prefix}}
+        #替换开始
+        replace $file $newfile $old_prefix $new_prefix $old_name
+        #替换结束
     fi
     done
 }
@@ -34,6 +78,12 @@ function package_sdk(){
         git init && git add . && git commit -m "build" 
         podspec=${old_name/$old_prefix/$new_prefix}
         pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs' --no-mangle --gomoad --exclude-deps
+        
+        if [ $? -ne 0 ]; then
+            echo -e "\033[31m error: pod package failed \033[0m"
+            kill $$
+        fi
+
         versionStr=`sed -n "/s.version *=/p" ${podspec}.podspec`
         versionStr=`echo $versionStr | tr -cd "[0-9.]"`
         versionStr=${versionStr:1}
@@ -91,14 +141,11 @@ function package_sdk(){
 }
 
 
+function setupGit(){
 
-
-function workStart(){
-
-    readConfig '/Users/zy/WorkSpace/Test/ShellTest/shell/config/Co_pay_PayNotificationSDK.config'
     mkdir -p $in_file_base_path
     mkdir -p $sdk_file_base_path
-    
+
     oldPrefix=$old_prefix
     #源代码git文件名
     in_path_name=${in_git_path##*/}
@@ -125,9 +172,12 @@ function workStart(){
         cd ${sdk_file_base_path}
         git clone $out_git_path
     fi
+}
 
+# 参数为new_prefix数组
+function startToFramework(){
+    new_prefix_arr=${*}
     #source_path 源代码本地git路径 #sdk_path 输出sdk指定git路径 #old_prefix 旧前缀  #new_prefix_arr 新前缀数组
-
     #遍历所有新前缀
     for prefix in ${new_prefix_arr[*]}; do
         new_prefix=$prefix
@@ -135,14 +185,76 @@ function workStart(){
         out_file_path=${out_file_base_path}/${new_name}
         rm -rf $out_file_path
         echo "删除 路径下文件" $out_file_path
-        getdir $source_path
+        getdir ${source_path} 1
         
         # 打包SDK并复制到sdk文件夹
         package_sdk
     done
+}
+
+function startToDemo(){
+        new_prefix_arr=${*}
+    #source_path 源代码本地git路径 #sdk_path 输出sdk指定git路径 #old_prefix 旧前缀  #new_prefix_arr 新前缀数组
+    #遍历所有新前缀
+    for prefix in ${new_prefix_arr[*]}; do
+        new_prefix=$prefix
+        new_name=${old_name/${old_prefix}/${new_prefix}}
+        out_file_path=${out_file_base_path}/${new_name}
+        rm -rf $out_file_path
+        echo "删除 路径下文件" $out_file_path
+        getdir ${source_path} 2
+        
+        # 打包SDK并复制到sdk文件夹
+        package_sdk
+    done
+}
+
+# 参数1类型：1打包config下所有config; 2打包config下某一个config; 3使用config下某一个config打包Demo
+# 参数2配置文件的地址
+# 参数3单独设置前缀或打Demo时使用新前缀
+function workStart(){
+
+    work_type=${1?}
+    config_file=${2?}
+    input_prefix=${3}
+    readConfig ${config_file}
+    
+    if [[ ${#input_prefix} >1 && ${work_type} != 1 ]]; then
+        unset new_prefix_arr
+        new_prefix_arr[0]=${input_prefix}
+    fi
+
+    # 设置git仓库
+    setupGit
+
+    # 开始
+    # 1打包config下所有config
+    # 2打包config下某一个config
+    # 3使用config下某一个config打包Demo
+    case ${work_type} in
+        '1')
+            echo -e "\033[33m start package all framework \033[0m"
+            startToFramework ${new_prefix_arr[*]}
+            ;;
+        '2')
+            echo -e "\033[33m start package ${new_prefix_arr[0]} prefix framework \033[0m"
+            startToFramework ${new_prefix_arr[*]}
+            ;;
+        '3')
+            echo -e "\033[33m start package ${new_prefix_arr[0]} prefix demo \033[0m"
+            startToDemo ${new_prefix_arr[*]}
+            ;;
+        '*')
+            echo -e "\033[31m error: work type is wrong \033[0m"
+            kill $$
+            ;;
+    esac
+
+
     # 上传
     cd ${sdk_path} && git pull origin && git add . && git commit -m $versionStr
     git push origin
 }
 
-workStart 
+workStart ${1?} ${2?} ${3?}
+# workStart '3' '/Users/zy/WorkSpace/Test/ShellTest/shell/config/Co_pay_PayNotificationSDK.config' 'New_Test_'
