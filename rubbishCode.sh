@@ -105,7 +105,7 @@ function generateFunc(){
 
 function insetFile(){
 
-	rubbishAllLineString=`grep '^[-+].*(.*).*' $rubbishFile`
+	rubbishAllLineString=`grep '^[-+].*(.*).*{' $rubbishFile`
 
 	rubbishLineArr=()
 	while [[ ${#rubbishAllLineString} != 0 ]]; do
