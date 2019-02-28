@@ -37,7 +37,8 @@ function replace_podSpec(){
 
 	sed -i '' "s/$oldPrefix/$newPrefix/g" $newFile
 	sedFilePathStr=${filePath//\//\\\/}
-	sed -i '' "/s.source *=/s/\'.*\'/\'$sedFilePathStr\'/g" $newFile
+	sedFilePathStr="{  :git =>'${sedFilePathStr}'}"
+	sed -i '' "/s.source *=/s/{.*}/${sedFilePathStr}/g" $newFile
 }
 
 #1:输入文件路径 #2:输出文件路径 #3旧的前缀 #4新的前缀
