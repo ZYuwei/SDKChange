@@ -77,7 +77,7 @@ function package_sdk(){
         cd $out_file_path
         git init && git add . && git commit -m "build" 
         podspec=${old_name/$old_prefix/$new_prefix}
-        pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs' --no-mangle --gomoad --exclude-deps
+        pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs,https://gitlab.com/gomo_sdk/sdk_insulate_spec.git' --no-mangle --gomoad --exclude-deps
         
         if [ $? -ne 0 ]; then
             echo -e "\033[31m error: pod package failed \033[0m"
@@ -90,7 +90,7 @@ function package_sdk(){
         frameworkPath="${out_file_path}/${podspec}-${versionStr}"
         echo frameworkPath $frameworkPath 
         #清空仓库
-        mkdir -p ${sdk_path}/${versionStr}
+        mkdir -p ${sdk_path}/${old_name}/${versionStr}
         for file in ${sdk_path}/${versionStr}/*
         do
             if [[ $file =~ "${podspec}" ]];then
@@ -99,16 +99,32 @@ function package_sdk(){
             fi
         done
         # 压缩sdk
-        zip -r ${frameworkPath}/${podspec}.zip ${frameworkPath}/ios
+        cd ${frameworkPath}
+        zip -r ${frameworkPath}/${podspec}.zip ./ios
+        if [ $? -ne 0 ]; then
+            echo -e "\033[31m error: zip ${frameworkPath}/ios failed \033[0m"
+            kill $$
+        fi
         # 拷贝到git 仓库
-        cp -r ${frameworkPath}/${podspec}.zip ${sdk_path}/${versionStr}/
+        cp -r ${frameworkPath}/${podspec}.zip ${sdk_path}/${old_name}/${versionStr}/
+        if [ $? -ne 0 ]; then
+            echo -e "\033[31m error: copy to ${sdk_path}/${old_name}/${versionStr}/ failed \033[0m"
+            kill $$
+        fi
+
         #修改spec
         sdk_spec_file=${frameworkPath}/${podspec}.podspec
         framework_download_path=${out_git_path%.*}
-        framework_download_path=${framework_download_path//github/raw.githubusercontent}/master/${versionStr}/${podspec}.zip
+        # github源对下载路径进行拼接
+        framework_download_path=${framework_download_path//github/raw.githubusercontent}/master/${old_name}/${versionStr}/${podspec}.zip
+        # gilab源，目前不可用
+        # framework_download_path=${framework_download_path}/raw/master/${old_name}/${versionStr}/${podspec}.zip?inline=false
         framework_download_path=${framework_download_path//\//\\\/}
         sed -i '' "s/s.source = —force/s.source ={ :http => '${framework_download_path}'}/g" $sdk_spec_file
-        
+        if [ $? -ne 0 ]; then
+            echo -e "\033[31m error: change $sdk_spec_file failed \033[0m"
+            kill $$
+        fi
         pod_spec_path="${pod_spec_base_path}/${podspec}/${versionStr}"
 
         if test -d ${pod_spec_base_path} ; then
@@ -134,6 +150,10 @@ function package_sdk(){
 
         # 拷贝
         cp -r ${sdk_spec_file} ${pod_spec_path}/
+        if [ $? -ne 0 ]; then
+            echo -e "\033[31m error: copy to ${pod_spec_path}/ failed \033[0m"
+            kill $$
+        fi
         # 上传git
         cd ${pod_spec_base_path} && git add . && git commit -m "update ${podspec} for ${versionStr}"
         git push origin

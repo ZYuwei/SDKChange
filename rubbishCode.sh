@@ -96,7 +96,7 @@ function generateFunc(){
 		rubbishFuncStr="${rubbishFuncStr}{"
 		# 获取内容
 		generateFuncContent 
-		rubbishInsetCode="${rubbishFuncStr}${rubbishContentStr}\\}\\"
+		rubbishInsetCode="${rubbishFuncStr}${rubbishContentStr}\\}"
 		# echo rubbishContentStr $rubbishContentStr
 		unset rubbishContentStr
 	fi
@@ -129,8 +129,11 @@ function insetFile(){
 			# 获取垃圾代码
 			generateFunc
 			# 插入
-			sed -i '' -e "/)${rubbishInsetLineStr}/i\\
-			${rubbishInsetCode}" $rubbishFile
+			sed -i '' "1,/)${rubbishInsetLineStr}/{/)${rubbishInsetLineStr}/i\\
+			${rubbishInsetCode}
+			}" $rubbishFile
+			# sed -i '' -e "/)${rubbishInsetLineStr}/i\\
+			# ${rubbishInsetCode}" $rubbishFile
 		else
 			echo -e "\033[33m warning: noinsert because no rubbishInsetLineStr rubbishFile ${rubbishFile} \033[0m" 
 		fi
