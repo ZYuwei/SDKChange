@@ -108,32 +108,38 @@ function insetFile(){
 	rubbishAllLineString=`grep '^[-+].*(.*).*{' $rubbishFile`
 
 	rubbishLineArr=()
+	rubbishLineStrRegular='[-+].*\(.*\).*{'
 	while [[ ${#rubbishAllLineString} != 0 ]]; do
 		# 条件需要修改 当{处于下一行时无法正常筛选
 		rubbishLineStr="${rubbishAllLineString%%{*}{"
 		rubbishLineStrlength=${#rubbishLineStr}
 		rubbishAllLineString=${rubbishAllLineString:${rubbishLineStrlength}}
-		rubbishLineArr[${#rubbishLineArr[*]}]=$rubbishLineStr
+
+		if [[ $rubbishLineStr =~ $rubbishLineStrRegular ]]; then
+			rubbishLineArr[${#rubbishLineArr[*]}]=$rubbishLineStr
+		# else
+		# 	echo -e "\033[33m warning: error rubbishLineStr:${rubbishLineStr} \033[0m" 
+		fi
 		# echo rubbishLineStr $rubbishLineStr rubbishAllLineString $rubbishAllLineString
 	done
 
 	if [[ ${#rubbishLineArr[*]} > 1 ]]; then
 		rubbishInsetLineNum=`echo $RANDOM%${#rubbishLineArr[*]} | bc`
 		rubbishInsetLineStr=${rubbishLineArr[$rubbishInsetLineNum]}
-		echo rubbishInsetLineStr $rubbishInsetLineStr
 		rubbishInsetLineStr="${rubbishInsetLineStr#*)}"
 		rubbishInsetLineStr="${rubbishInsetLineStr%%:*}"
-		rubbishInsetLineStr="${rubbishInsetLineStr%%{*}"
+		rubbishInsetLineStr=")${rubbishInsetLineStr%%{*}"
 
 		if [[ ${#rubbishInsetLineStr} > 1 ]]; then
 			# 获取垃圾代码
 			generateFunc
-			# 插入
-			sed -i '' "1,/)${rubbishInsetLineStr}/{/)${rubbishInsetLineStr}/i\\
+			# 插入 
+			sed -i '' "1,/${rubbishInsetLineStr}/{/${rubbishInsetLineStr}/i\\
 			${rubbishInsetCode}
 			}" $rubbishFile
 			# sed -i '' -e "/)${rubbishInsetLineStr}/i\\
 			# ${rubbishInsetCode}" $rubbishFile
+			echo " insert rubbishCode to rubbishFile:${rubbishFile} " 
 		else
 			echo -e "\033[33m warning: noinsert because no rubbishInsetLineStr rubbishFile ${rubbishFile} \033[0m" 
 		fi
