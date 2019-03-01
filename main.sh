@@ -54,7 +54,7 @@ function getdirForDemo(){
     if test -d $file ; then
         #文件夹递归
         lasePath=${file##*/}
-        if [[ $lasePath == "Pods" ]]; then
+        if [[ $lasePath == "Pods" || $lasePath == "${old_name}.xcworkspace" ]]; then
             echo "忽略 路径" $lasePath
         else
             # demo文件夹特殊处理
