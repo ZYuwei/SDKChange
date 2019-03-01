@@ -173,20 +173,19 @@ function setupGit(){
     #源代码路径
     source_path="${in_file_base_path}/${in_path_name}"
     if test -d $source_path ; then
-        cd $source_path
-        git pull
-        if [[ ${#code_branch} > 1 ]]; then
-            git checkout ${code_branch}
-        fi
-    else
-        cd ${in_file_base_path}
-        if [[ ${#code_branch} > 1 ]]; then
-            git clone -b ${code_branch} $in_git_path
-        else
-            git clone $in_git_path 
-        fi
-        
+        rm -rf ${source_path}
     fi
+
+    cd ${in_file_base_path}
+    if [[ ${#code_branch} > 1 ]]; then
+        echo "clone from branch :${code_branch}"
+        git clone -b ${code_branch} $in_git_path
+    else
+        echo "clone from master branch"
+        git clone -b master $in_git_path 
+    fi
+        
+    
 
     if [ $? -ne 0 ]; then
         echo -e "\033[31m error: git setup failed ${in_git_path} \033[0m"
