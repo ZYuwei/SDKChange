@@ -175,9 +175,17 @@ function setupGit(){
     if test -d $source_path ; then
         cd $source_path
         git pull
+        if [[ ${#code_branch} > 1 ]]; then
+            git checkout ${code_branch}
+        fi
     else
         cd ${in_file_base_path}
-        git clone $in_git_path
+        if [[ ${#code_branch} > 1 ]]; then
+            git clone -b ${code_branch} $in_git_path
+        else
+            git clone $in_git_path 
+        fi
+        
     fi
 
     if [ $? -ne 0 ]; then
@@ -241,12 +249,14 @@ function startToDemo(){
 # 参数1类型：1-通过config下所有前缀进行打包framework; 2-通过config以及在参数3输入的前缀进行打包framework; 3-通过config以及在参数3输入的前缀进行打包Demo
 # 参数2配置文件的地址
 # 参数3单独设置前缀或打Demo时使用新前缀
-# 如:workStart '3' '/Users/zy/WorkSpace/Test/ShellTest/shell/config/Co_pay_PayNotificationSDK.config' 'New_Test_'
+# 参数4版本号或者分支
+# 如:workStart '3' '/Users/zy/WorkSpace/Test/ShellTest/shell/config/Co_pay_PayNotificationSDK.config' 'New_Test_' 'new_pay_master'
 function workStart(){
 
     work_type=${1?}
     config_file=${2?}
     input_prefix=${3}
+    code_branch=${4}
     readConfig ${config_file}
     
     if [[ ${#input_prefix} >1 && ${work_type} != 1 ]]; then
@@ -286,5 +296,5 @@ function workStart(){
     git push origin
 }
 
-workStart ${1?} ${2?} ${3}
+workStart ${1?} ${2?} ${3} ${4}
 
