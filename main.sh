@@ -49,26 +49,28 @@ function getdir(){
 
 function getdirForDemo(){
     echo "检索文件夹" ${1?}
+    noprefix_name=${old_name//${old_prefix}/}
+    ignore_workspace="${noprefix_name}.xcworkspace"
     for file in $1/*
     do
-    if test -d $file ; then
-        #文件夹递归
-        lasePath=${file##*/}
-        if [[ $lasePath == "Pods" || $lasePath == "${old_name}.xcworkspace" ]]; then
-            echo "忽略 路径" $lasePath
-        else
-            # demo文件夹特殊处理
-            getdirForDemo ${file}
-        fi  
+        if test -d $file ; then
+            #文件夹递归
+            lasePath=${file##*/}
+            if [[ $lasePath == "Pods" || $lasePath =~ $ignore_workspace ]]; then
+                echo "忽略 路径" $lasePath
+            else
+                # demo文件夹特殊处理
+                getdirForDemo ${file}
+            fi  
 
-    elif test -f $file ; then
-        #替换文件名
-        newfile="${out_file_path}${file##${source_path}}"
-        # newfile=${newfile//${old_prefix}/${new_prefix}}
-        #替换开始
-        replace $file $newfile $old_prefix $new_prefix $old_name
-        #替换结束
-    fi
+        elif test -f $file ; then
+            #替换文件名
+            newfile="${out_file_path}${file##${source_path}}"
+            # newfile=${newfile//${old_prefix}/${new_prefix}}
+            #替换开始
+            replace $file $newfile $old_prefix $new_prefix $old_name
+            #替换结束
+        fi
     done
 }
 
@@ -174,6 +176,10 @@ function setupGit(){
     source_path="${in_file_base_path}/${in_path_name}"
     if test -d $source_path ; then
         rm -rf ${source_path}
+        if [ $? -ne 0 ]; then
+            echo -e "\033[31m error: rm old sourcePath failed ${source_path} \033[0m"
+        kill $$
+    fi
     fi
 
     cd ${in_file_base_path}
