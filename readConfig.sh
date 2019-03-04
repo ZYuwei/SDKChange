@@ -69,7 +69,7 @@ function readConfig(){
 
 	echo old_name: $old_name
 	echo old_prefix: $old_prefix
-	echo new_prefix_arr: ${new_prefix_arr[*]}
+	echo new_prefix_arr from config: ${new_prefix_arr[*]}
 	echo in_git_path: $in_git_path
 	echo out_git_path: $out_git_path
 	echo in_file_base_path: $in_file_base_path

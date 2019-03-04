@@ -40,7 +40,7 @@ function getdir(){
         newfile="${out_file_path}${file##${source_path}}"
         newfile=${newfile//${old_prefix}/${new_prefix}}
         #替换开始
-        replace $file $newfile $old_prefix $new_prefix $old_name
+        replace $file $newfile $old_prefix $old_name $new_prefix
         #替换结束
         rubbishCode $newfile
     fi
@@ -68,7 +68,7 @@ function getdirForDemo(){
             newfile="${out_file_path}${file##${source_path}}"
             # newfile=${newfile//${old_prefix}/${new_prefix}}
             #替换开始
-            replace $file $newfile $old_prefix $new_prefix $old_name
+            replace $file $newfile $old_prefix $old_name $new_prefix
             #替换结束
         fi
     done
@@ -78,7 +78,7 @@ function package_sdk(){
         # 创建git
         cd $out_file_path
         git init && git add . && git commit -m "build" 
-        podspec=${old_name/$old_prefix/$new_prefix}
+        podspec=${old_name//$old_prefix/$new_prefix}
         pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs,https://gitlab.com/gomo_sdk/sdk_insulate_spec.git' --no-mangle --gomoad --exclude-deps
         
         if [ $? -ne 0 ]; then
@@ -192,7 +192,6 @@ function setupGit(){
     fi
         
     
-
     if [ $? -ne 0 ]; then
         echo -e "\033[31m error: git setup failed ${in_git_path} \033[0m"
         kill $$
@@ -221,25 +220,49 @@ function startToFramework(){
     new_prefix_arr=${*}
     #source_path 源代码本地git路径 #sdk_path 输出sdk指定git路径 #old_prefix 旧前缀  #new_prefix_arr 新前缀数组
     #遍历所有新前缀
-    for prefix in ${new_prefix_arr[*]}; do
-        new_prefix=$prefix
+    if [[ ${#new_prefix_arr[0]} > 0 ]]; then
+        for prefix in ${new_prefix_arr[*]}; do
+            new_prefix=$prefix
+            new_name=${old_name/${old_prefix}/${new_prefix}}
+            out_file_path=${out_file_base_path}/${new_name}
+            rm -rf $out_file_path
+            echo "删除 路径下文件" $out_file_path
+            getdir ${source_path} 1
+            
+            # 打包SDK并复制到sdk文件夹
+            package_sdk
+        done
+    else
+        new_prefix=""
         new_name=${old_name/${old_prefix}/${new_prefix}}
         out_file_path=${out_file_base_path}/${new_name}
         rm -rf $out_file_path
         echo "删除 路径下文件" $out_file_path
         getdir ${source_path} 1
-        
         # 打包SDK并复制到sdk文件夹
         package_sdk
-    done
+    fi
+
 }
 
 function startToDemo(){
-        new_prefix_arr=${*}
+    new_prefix_arr=${*}
     #source_path 源代码本地git路径 #sdk_path 输出sdk指定git路径 #old_prefix 旧前缀  #new_prefix_arr 新前缀数组
     #遍历所有新前缀
-    for prefix in ${new_prefix_arr[*]}; do
-        new_prefix=$prefix
+    if [[ ${#new_prefix_arr[0]} > 0 ]]; then
+        for prefix in ${new_prefix_arr[*]}; do
+            new_prefix=$prefix
+            new_name=${old_name/${old_prefix}/${new_prefix}}
+            out_file_path=${out_file_base_path}/${new_name}
+            rm -rf $out_file_path
+            echo "删除 路径下文件" $out_file_path
+            getdir ${source_path} 2
+            cd ${out_file_path}/Example && pod install
+            # 打包SDK并复制到sdk文件夹
+            package_sdk
+        done
+    else
+        new_prefix=""
         new_name=${old_name/${old_prefix}/${new_prefix}}
         out_file_path=${out_file_base_path}/${new_name}
         rm -rf $out_file_path
@@ -248,23 +271,24 @@ function startToDemo(){
         cd ${out_file_path}/Example && pod install
         # 打包SDK并复制到sdk文件夹
         package_sdk
-    done
+    fi
+
 }
 
 # 参数1类型：1-通过config下所有前缀进行打包framework; 2-通过config以及在参数3输入的前缀进行打包framework; 3-通过config以及在参数3输入的前缀进行打包Demo
 # 参数2配置文件的地址
-# 参数3单独设置前缀或打Demo时使用新前缀
-# 参数4版本号或者分支
-# 如:workStart '3' '/Users/zy/WorkSpace/Test/ShellTest/shell/config/Co_pay_PayNotificationSDK.config' 'New_Test_' 'new_pay_master'
+# 参数3版本号或者分支
+# 参数4单独设置前缀或打Demo时使用新前缀
+# 如:workStart '3' '/Users/zy/WorkSpace/Test/ShellTest/shell/config/Co_pay_PayNotificationSDK.config' 'new_pay_master' 'New_Test_' 
 function workStart(){
 
     work_type=${1?}
     config_file=${2?}
-    input_prefix=${3}
-    code_branch=${4}
+    code_branch=${3}
+    input_prefix=${4}
     readConfig ${config_file}
     
-    if [[ ${#input_prefix} >1 && ${work_type} != 1 ]]; then
+    if [[ work_type >1 ]]; then
         unset new_prefix_arr
         new_prefix_arr[0]=${input_prefix}
     fi
@@ -301,5 +325,5 @@ function workStart(){
     git push origin
 }
 
-workStart ${1?} ${2?} ${3} ${4}
+workStart ${1?} ${2?} ${3} ${4} 
 

@@ -47,8 +47,8 @@ function replace(){
 	file=${1?}
 	newFile=${2?}
 	oldPrefix=${3?}
-	newPrefix=${4?}
-	sdkName=${5?}
+	sdkName=${4?}
+	newPrefix=${5}
 
 	filePath=${newFile%/*}
 	mkdir -p $filePath

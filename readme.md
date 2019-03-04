@@ -38,7 +38,7 @@ s.pod_git_path='https://gitlab.com/gomo_sdk/sdk_insulate_spec.git'
 参数2:
 配置文件的地址
 参数3:
-单独设置前缀或打Demo时使用新前缀
-参数4:
 版本号或者分支
-### 如: ./main.sh '3' '/Users/zy/WorkSpace/Test/ShellTest/shell/configExample/Co_pay_PaymentSDK.config' 'New_Test_' 'new_pay_master'
+参数4:
+单独设置前缀或打Demo时使用新前缀
+### 如: ./main.sh '3' '/Users/zy/WorkSpace/Test/ShellTest/shell/configExample/Co_pay_PaymentSDK.config' 'new_pay_master' 'New_Test_' 
