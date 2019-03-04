@@ -1,7 +1,8 @@
 #! /bin/bash
-. ./replace.sh
-. ./rubbishCode.sh
-. ./readConfig.sh
+basepath=$(cd `dirname $0`; pwd)
+. ${basepath}/replace.sh
+. ${basepath}/rubbishCode.sh
+. ${basepath}/readConfig.sh
 
 # search_type: 1framework 2demo
 function getdir(){

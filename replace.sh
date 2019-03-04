@@ -1,7 +1,8 @@
 #! /bin/bash
+replace_base_path=$(cd `dirname $0`; pwd)
 
 function prefixLow(){
-	prifixStr=${1?}
+	prifixStr=${1}
 	firstStr="${prifixStr:0:1}"
 	otherStr=${prifixStr:1}
 	firstStr=`echo $firstStr | tr 'A-Z' 'a-z'`
@@ -35,7 +36,27 @@ function replace_podSpec(){
 
 	cp -r $file $newFile
 
-	sed -i '' "s/$oldPrefix/$newPrefix/g" $newFile
+	# sed -i '' "s/$oldPrefix/$newPrefix/g" $newFile
+	# 修改关联前缀的SDK
+
+	prefixList=`grep -h 's.prefixList.*' ${replace_base_path}/shell.config`
+	prefixList=${prefixList#*=}
+	prefixList=${prefixList%\#*}
+	echo will change prefixList $prefixList replace_base_path ${replace_base_path}/shell.config
+	while [[ ${#prefixList} >1 ]]; do
+		prefixConfig=${prefixList%,*}
+		if [[ $prefixList == $prefixConfig ]]; then
+			unset prefixList 
+		else
+			prefixList=${prefixList#*,}
+		fi
+
+		prefixConfig=${prefixConfig#*\'}
+		prefixConfig=${prefixConfig%%\'*}
+		echo prefixConfig $prefixConfig
+		sed -i '' "s/$prefixConfig/$newPrefix/g" $newFile
+	done
+
 	sedFilePathStr=${filePath//\//\\\/}
 	sedFilePathStr="{  :git =>'${sedFilePathStr}'}"
 	sed -i '' "/s.source *=/s/{.*}/${sedFilePathStr}/g" $newFile
