@@ -87,11 +87,21 @@ function package_sdk(){
             kill $$
         fi
 
-        versionStr=`sed -n "/s.version *=/p" ${podspec}.podspec`
+        local_spec_name=${podspec}.podspec
+        # 进入framework
+        versionStr=`sed -n "/s.version *=/p" $local_spec_name`
         versionStr=`echo $versionStr | tr -cd "[0-9.]"`
         versionStr=${versionStr:1}
         frameworkPath="${out_file_path}/${podspec}-${versionStr}"
-        echo frameworkPath $frameworkPath 
+        echo frameworkPath $frameworkPath
+
+        # 更新打包后spec文件
+        dependencyStr=`sed -n "/s.dependency.*/p" $local_spec_name`
+
+        sed -i '' "/^end$/d" ${frameworkPath}/${local_spec_name}
+        echo "$dependencyStr" >> ${frameworkPath}/${local_spec_name}
+        echo 'end' >> ${frameworkPath}/${local_spec_name}
+
         #清空仓库
         mkdir -p ${sdk_path}/${old_name}/${versionStr}
         for file in ${sdk_path}/${versionStr}/*

@@ -38,7 +38,6 @@ function replace_podSpec(){
 
 	# sed -i '' "s/$oldPrefix/$newPrefix/g" $newFile
 	# 修改关联前缀的SDK
-
 	prefixList=`grep -h 's.prefixList.*' ${replace_base_path}/shell.config`
 	prefixList=${prefixList#*=}
 	prefixList=${prefixList%\#*}
