@@ -1,6 +1,5 @@
 #! /bin/bash
 replace_base_path=$(cd `dirname $0`; pwd)
-
 function readShellConfig(){
 	prefixList=`grep -h 's.prefixList.*' ${replace_base_path}/shell.config`
 	prefixList=${prefixList#*=}

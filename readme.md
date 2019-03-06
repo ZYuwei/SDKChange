@@ -1,8 +1,12 @@
 # 脚本使用方法
-注：大部分SDK都会依赖统计SDK，因此在打DEMO时，需先将统计SDK打包出相应前缀
+注：
+1.大部分SDK都会依赖统计SDK，因此在打DEMO时，需先将统计SDK打包出相应前缀
 ## 1配置shell.config文件
 目前针对统计、买量、支付 SDK 设置了默认的前缀，如需增加SDK的设置需要在此文件中配置
-
+<!--历史前缀的列表-->
+s.prefixList='Co_st_','Co_pay_','Co_bc_'
+<!--当前使用的cocoapods repo -->
+s.repoName='sdk_insulate_spec'
 ## 2.正确配置.config文件
 *****若需输入空格时用';'代替*****
 
