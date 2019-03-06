@@ -1,5 +1,9 @@
 # 脚本使用方法
-## 1.正确配置.config文件
+注：大部分SDK都会依赖统计SDK，因此在打DEMO时，需先将统计SDK打包出相应前缀
+## 1配置shell.config文件
+目前针对统计、买量、支付 SDK 设置了默认的前缀，如需增加SDK的设置需要在此文件中配置
+
+## 2.正确配置.config文件
 *****若需输入空格时用';'代替*****
 
 内容如下:
@@ -27,7 +31,7 @@ s.pod_spec_base_path='/Users/zy/WorkSpace/Test/ShellTest/sdk_insulate_spec'
 <!--pod私有库的Git地址-->
 s.pod_git_path='https://gitlab.com/gomo_sdk/sdk_insulate_spec.git'
 
-## 调用main.sh 脚本文件
+## 3调用main.sh 脚本文件
 
 调用脚本时，需传递4个参数
 参数1:

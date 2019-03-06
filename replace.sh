@@ -1,6 +1,27 @@
 #! /bin/bash
 replace_base_path=$(cd `dirname $0`; pwd)
 
+function readShellConfig(){
+	prefixList=`grep -h 's.prefixList.*' ${replace_base_path}/shell.config`
+	prefixList=${prefixList#*=}
+	prefixList=${prefixList%\#*}
+	echo will change prefixList $prefixList replace_base_path ${replace_base_path}/shell.config
+	while [[ ${#prefixList} >1 ]]; do
+		prefixConfig=${prefixList%,*}
+		if [[ $prefixList == $prefixConfig ]]; then
+			unset prefixList 
+		else
+			prefixList=${prefixList#*,}
+		fi
+
+		prefixConfig=${prefixConfig#*\'}
+		prefixConfig=${prefixConfig%%\'*}
+		echo prefixConfig $prefixConfig
+		prefix_config_arr[${#prefix_config_arr[*]}]=$prefixConfig
+	done
+}
+readShellConfig
+
 function prefixLow(){
 	prifixStr=${1}
 	firstStr="${prifixStr:0:1}"
@@ -18,13 +39,17 @@ function replace_content(){
 	if [[ ${file} =~ $fileRegularStr ]]; then
 	    echo "修改OC文件 " $file
 		#内容替换
-		oldMethodPrefix=`prefixLow $oldPrefix`
 		newMethodPrefix=`prefixLow $newPrefix`
-		sed -i '' -e "s/$oldMethodPrefix/$newMethodPrefix/g" -e "s/$oldPrefix/$newPrefix/g" $newFile
+		for config_Prefix in ${prefix_config_arr[*]}; do
+			oldMethodPrefix=`prefixLow $config_Prefix`
+			sed -i '' -e "s/$oldMethodPrefix/$newMethodPrefix/g" -e "s/$config_Prefix/$newPrefix/g" $newFile
+		done
 	elif [[ ${file} =~ $podRegularStr ]]; then
 		echo "修改podfile文件 " $file
 
-		sed -i '' "/pod.*${oldPrefix}/s/$oldPrefix/$newPrefix/g" $newFile
+		for config_Prefix in ${prefix_config_arr[*]}; do
+			sed -i '' "/pod.*${config_Prefix}/s/$config_Prefix/$newPrefix/g" $newFile
+		done
 	fi	
 }
 
@@ -38,22 +63,8 @@ function replace_podSpec(){
 
 	# sed -i '' "s/$oldPrefix/$newPrefix/g" $newFile
 	# 修改关联前缀的SDK
-	prefixList=`grep -h 's.prefixList.*' ${replace_base_path}/shell.config`
-	prefixList=${prefixList#*=}
-	prefixList=${prefixList%\#*}
-	echo will change prefixList $prefixList replace_base_path ${replace_base_path}/shell.config
-	while [[ ${#prefixList} >1 ]]; do
-		prefixConfig=${prefixList%,*}
-		if [[ $prefixList == $prefixConfig ]]; then
-			unset prefixList 
-		else
-			prefixList=${prefixList#*,}
-		fi
-
-		prefixConfig=${prefixConfig#*\'}
-		prefixConfig=${prefixConfig%%\'*}
-		echo prefixConfig $prefixConfig
-		sed -i '' "s/$prefixConfig/$newPrefix/g" $newFile
+	for config_Prefix in ${prefix_config_arr[*]}; do
+		sed -i '' "s/$config_Prefix/$newPrefix/g" $newFile
 	done
 
 	sedFilePathStr=${filePath//\//\\\/}
