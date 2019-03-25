@@ -236,6 +236,10 @@ function setupGit(){
 # 参数为new_prefix数组
 function startToFramework(){
     new_prefix_arr=${*}
+    # 更新pod仓库
+    repoName=`grep -h 's.repoName.*' ${basepath}/shell.config`
+    repoName=`changeConfig $repoName`
+    pod repo update $repoName
     #source_path 源代码本地git路径 #sdk_path 输出sdk指定git路径 #old_prefix 旧前缀  #new_prefix_arr 新前缀数组
     #遍历所有新前缀
     if [[ ${#new_prefix_arr[0]} > 0 ]]; then
