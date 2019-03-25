@@ -81,7 +81,14 @@ function package_sdk(){
         git init && git add . && git commit -m "build" 
         podspec=${old_name//$old_prefix/$new_prefix}
         echo podspec ${podspec}
-        pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs,https://gitlab.com/gomo_sdk/sdk_insulate_spec.git' --no-mangle  --exclude-deps #--gomoad
+
+        if [[ $old_prefix == 'Co_ad_' ]]; then
+                echo 广告sdk打包
+                pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs,https://gitlab.com/gomo_sdk/sdk_insulate_spec.git' --no-mangle  --exclude-deps --gomoad
+            else
+                pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs,https://gitlab.com/gomo_sdk/sdk_insulate_spec.git' --no-mangle  --exclude-deps #--gomoad
+        fi
+
         
         if [ $? -ne 0 ]; then
             echo -e "\033[31m error: pod package failed \033[0m"
