@@ -80,6 +80,10 @@ function replace(){
 	sdkName=${4?}
 	newPrefix=${5}
 
+	for config_Prefix in ${prefix_config_arr[*]}; do
+	    newfile=${newfile//${config_Prefix}/${newPrefix}}		
+	done
+
 	filePath=${newFile%/*}
 	mkdir -p $filePath
 	touch $newFile	
