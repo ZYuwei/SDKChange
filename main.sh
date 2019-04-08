@@ -82,7 +82,7 @@ function package_sdk(){
         podspec=${old_name//$old_prefix/$new_prefix}
         echo podspec ${podspec}
 
-        if [[ $old_prefix == 'Co_ad_' ]]; then
+        if [[ $old_prefix == 'Co_ad_' || $old_prefix == 'Co_gift_' ]]; then
                 echo 广告sdk打包
                 pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs,https://gitlab.com/gomo_sdk/sdk_insulate_spec.git' --no-mangle  --exclude-deps --gomoad
             else
