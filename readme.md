@@ -4,7 +4,7 @@
 ## 1配置shell.config文件
 目前针对统计、买量、支付 SDK 设置了默认的前缀，如需增加SDK的设置需要在此文件中配置
 <!--历史前缀的列表-->
-s.prefixList='Co_st_','Co_pay_','Co_bc_'
+s.prefixList='Co_st_','Co_pay_','Co_bc_','Co_da_'
 <!--当前使用的cocoapods repo -->
 s.repoName='sdk_insulate_spec'
 ## 2.正确配置.config文件
