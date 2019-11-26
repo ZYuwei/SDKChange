@@ -35,7 +35,17 @@ s.pod_spec_base_path='/Users/zy/WorkSpace/Test/ShellTest/sdk_insulate_spec'
 <!--pod私有库的Git地址-->
 s.pod_git_path='https://gitlab.com/gomo_sdk/sdk_insulate_spec.git'
 
-## 3调用main.sh 脚本文件
+## 3代码编写注意事项
+### 3.1SDK代码编写规范
+3.1.1.对外接口、属性、类型必须加前缀，方法的前缀首字母小写，属性和类型前缀首字母大写。
+3.1.2.‘.m’中的方法要确保方法名后跟随的'{'应与方法名处于同一行
+3.1.3.私有/仅SDK内部使用方法、属性可以不加前缀.
+
+### 3.2 podspec配置规范
+3.2.1 若包含bundle等资源文件，使用s.resource_bundles = {}格式设置
+3.2.2 目前仅支持s.dependency的正确配置
+
+## 4调用main.sh 脚本文件
 
 调用脚本时，需传递4个参数
 参数1:
@@ -49,4 +59,4 @@ s.pod_git_path='https://gitlab.com/gomo_sdk/sdk_insulate_spec.git'
 版本号或者分支
 参数4:
 单独设置前缀或打Demo时使用新前缀
-### 如: ./main.sh '3' '/Users/zy/WorkSpace/Test/ShellTest/shell/configExample/Co_pay_PaymentSDK.config' 'new_pay_master' 'New_Test_' 
+### 如: ./main.sh '3' '/Users/zy/WorkSpace/Test/ShellTest/shell/configExample/''Co_pay_PaymentSDK.config' 'new_pay_master' 'New_Test_' 

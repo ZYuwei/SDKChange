@@ -103,10 +103,22 @@ function package_sdk(){
         frameworkPath="${out_file_path}/${podspec}-${versionStr}"
         echo frameworkPath $frameworkPath
 
+        #删除end所在行
+        sed -i '' "/^end$/d" ${frameworkPath}/${local_spec_name}
+
         # 更新打包后spec文件
         dependencyStr=`sed -n "/s.dependency.*/p" $local_spec_name`
+        # 将bundles写入spec
+        resourceBundlesStr=`cat $local_spec_name|sed '/ *#/d'|awk '{{printf"%s",$0}}'|grep '.resource_bundles*'`
+        if [ -n "$resourceBundlesStr" ]; then 
+            echo "resourceBundlesStr is not empty"
+            resourceBundlesStr=`echo ${resourceBundlesStr##*.resource_bundles *{}`
+            resourceBundlesStr=`echo ${resourceBundlesStr%%\}*}`
+            resourceBundlesStr="  s.resource_bundles = { ${resourceBundlesStr} }"
+            echo "$resourceBundlesStr" >> ${frameworkPath}/${local_spec_name}
+            echo resourceBundlesStr is $resourceBundlesStr
+        fi
 
-        sed -i '' "/^end$/d" ${frameworkPath}/${local_spec_name}
         echo "$dependencyStr" >> ${frameworkPath}/${local_spec_name}
         echo 'end' >> ${frameworkPath}/${local_spec_name}
 
