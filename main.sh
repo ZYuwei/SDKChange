@@ -112,10 +112,9 @@ function package_sdk(){
         resourceBundlesStr=`cat $local_spec_name|sed '/ *#/d'|awk '{{printf"%s",$0}}'|grep '.resource_bundles*'`
         if [ -n "$resourceBundlesStr" ]; then 
             echo "resourceBundlesStr is not empty"
-            resourceBundlesStr=`echo ${resourceBundlesStr##*.resource_bundles *{}`
-            resourceBundlesStr=`echo ${resourceBundlesStr%%\}*}`
-            resourceBundlesStr="  s.resource_bundles = { ${resourceBundlesStr} }"
-            echo "$resourceBundlesStr" >> ${frameworkPath}/${local_spec_name}
+            resourceBundlesStr=`echo ${resourceBundlesStr#*.resource_bundles *\'}`
+            resourceBundlesStr=`echo ${resourceBundlesStr%%\'*}`
+            echo "  s.resources = 'ios/${resourceBundlesStr}.bundle' " >> ${frameworkPath}/${local_spec_name}
             echo resourceBundlesStr is $resourceBundlesStr
         fi
 
@@ -131,13 +130,21 @@ function package_sdk(){
                 echo "删除历史文件" $podspec $file
             fi
         done
-        # 压缩sdk
+       
         cd ${frameworkPath}
+        # 如果有资源文件则对资源进行移动
+        if [ -n "$resourceBundlesStr" ]; then 
+            mv ios/${podspec}.framework/Resources/${resourceBundlesStr}.bundle ./ios
+            rm -rf ios/${podspec}.framework/Resources
+        fi
+         # 压缩sdk
         zip -r ${frameworkPath}/${podspec}.zip ./ios
         if [ $? -ne 0 ]; then
             echo -e "\033[31m error: zip ${frameworkPath}/ios failed \033[0m"
             kill $$
         fi
+        #删除压缩包中多余文件
+        zip -d ${podspec}.zip ios/${podspec}.framework/Versions/\*
         # 拷贝到git 仓库
         cp -r ${frameworkPath}/${podspec}.zip ${sdk_path}/${old_name}/${versionStr}/
         if [ $? -ne 0 ]; then
