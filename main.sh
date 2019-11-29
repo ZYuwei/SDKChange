@@ -212,31 +212,47 @@ function setupGit(){
     #源代码路径
     source_path="${in_file_base_path}/${in_path_name}"
     if test -d $source_path ; then
-        rm -rf ${source_path}
+    	cd ${source_path}
+    	echo "reset git 仓库"
+		git reset --hard HEAD && git checkout master && git pull
+
+	    if [[ ${#code_branch} > 1 ]]; then
+	        echo "checkout from branch :${code_branch}"
+	        git checkout ${code_branch} 
+	    else
+	        echo "checkout from master branch"
+	        git checkout master 
+	    fi
+
         if [ $? -ne 0 ]; then
-            echo -e "\033[31m error: rm old sourcePath failed ${source_path} \033[0m"
-        kill $$
-    fi
+            echo -e "\033[31m error: git checkout failed ${in_git_path} \033[0m"
+            kill $$
+        fi
+
+	else
+		cd ${in_file_base_path}
+
+	    if [[ ${#code_branch} > 1 ]]; then
+	        echo "clone from branch :${code_branch}"
+	        git clone -b ${code_branch} $in_git_path
+	    else
+	        echo "clone from master branch"
+	        git clone -b master $in_git_path 
+	    fi
+	        
+	    
+	    if [ $? -ne 0 ]; then
+	        echo -e "\033[31m error: git setup failed ${in_git_path} \033[0m"
+	        kill $$
+	    fi
+
     fi
 
-    cd ${in_file_base_path}
-    if [[ ${#code_branch} > 1 ]]; then
-        echo "clone from branch :${code_branch}"
-        git clone -b ${code_branch} $in_git_path
-    else
-        echo "clone from master branch"
-        git clone -b master $in_git_path 
-    fi
-        
-    
-    if [ $? -ne 0 ]; then
-        echo -e "\033[31m error: git setup failed ${in_git_path} \033[0m"
-        kill $$
-    fi
     # 输出git文件名 
     out_path_name=${out_git_path##*/}
     out_path_name=${out_path_name%.*}
-    #framework git仓库路径
+
+    #framework git仓库路径,更新拉取内容
     sdk_path="${sdk_file_base_path}/${out_path_name}"
     if test -d $sdk_path ; then
         cd $sdk_path
