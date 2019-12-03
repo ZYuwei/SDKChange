@@ -229,6 +229,8 @@ function setupGit(){
             kill $$
         fi
 
+        git pull
+        
 	else
 		cd ${in_file_base_path}
 
