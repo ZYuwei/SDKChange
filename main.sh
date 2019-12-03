@@ -250,6 +250,15 @@ function setupGit(){
 
     fi
 
+    #移除gemfile.lock文件防止插件版本限制
+    examplePath="${source_path}/Example"
+    if test -d $examplePath ; then
+        gemfileLockPath="${examplePath}/Gemfile.lock"
+        echo 移除  $gemfileLockPath
+        rm $gemfileLockPath
+    fi
+
+
     # 输出git文件名 
     out_path_name=${out_git_path##*/}
     out_path_name=${out_path_name%.*}
@@ -355,7 +364,7 @@ function workStart(){
     input_prefix=${4}
     readConfig ${config_file}
     
-    if [[ work_type >1 ]]; then
+    if [[ work_type > 1 ]]; then
         unset new_prefix_arr
         new_prefix_arr[0]=${input_prefix}
     fi
