@@ -80,9 +80,10 @@ function package_sdk(){
         cd $out_file_path
         git init && git add . && git commit -m "build" 
         podspec=${old_name//$old_prefix/$new_prefix}
+        echo old_name ${old_name}
         echo podspec ${podspec}
-
-        if [[ $old_prefix == 'Co_ad_' || $old_prefix == 'Co_gift_' ]]; then
+        # admob源需要通过--gomoad 用于防止打包
+        if [[ $old_name == 'Co_ad_CSAdmobAdLoad' ]]; then
                 echo 广告sdk打包
                 pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs,https://gitlab.com/gomo_sdk/sdk_insulate_spec.git' --no-mangle  --exclude-deps --gomoad
             else
