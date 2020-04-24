@@ -157,7 +157,7 @@ function package_sdk(){
         sdk_spec_file=${frameworkPath}/${podspec}.podspec
         framework_download_path=${out_git_path%.*}
         # github源对下载路径进行拼接
-        framework_download_path=${framework_download_path//github/raw.githubusercontent}/master/${old_name}/${versionStr}/${podspec}.zip
+        framework_download_path=${framework_download_path}/blob/master/${old_name}/${versionStr}/${podspec}.zip
         # gilab源，目前不可用
         # framework_download_path=${framework_download_path}/raw/master/${old_name}/${versionStr}/${podspec}.zip?inline=false
         framework_download_path=${framework_download_path//\//\\\/}
