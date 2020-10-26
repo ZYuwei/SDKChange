@@ -83,7 +83,7 @@ function package_sdk(){
         echo old_name ${old_name}
         echo podspec ${podspec}
         # admob源需要通过--gomoad 用于防止打包
-        if [[ $old_name == 'Co_ad_CSAdmobAdLoad' ]]; then
+        if [[ $old_name == 'Co_ad_CSAdmobAdLoad' ]] || [[ $old_name == 'Co_ad_CSBUAdLoad' ]]; then
                 echo 广告sdk打包
                 pod package ${podspec}.podspec —force --spec-sources='https://github.com/CocoaPods/Specs.git,http://gerrit.3g.net.cn/gomo_ios_specs,https://gitlab.com/gomo_sdk/sdk_insulate_spec.git' --no-mangle  --exclude-deps --gomoad
             else
